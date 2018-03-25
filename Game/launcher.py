@@ -1,5 +1,6 @@
 import pygame
 
+from collision import HitBox
 from dimensioning import Dimensioned
 from images import ImageList
 from positioning import Positioned, PositionChangedListener
@@ -24,6 +25,8 @@ class Player(Positioned, Dimensioned):
         Positioned.__init__(self, x, y)
         Dimensioned.__init__(self, length, height)
 
+        self.hitBox = HitBox(x + 17, y + 11, 29, 52)
+
         self.vel = 5
         self.isJump = False
         self.left = False
@@ -33,7 +36,6 @@ class Player(Positioned, Dimensioned):
         self.walkCount = 0
         self.jumpCount = 10
         self.standing = True
-        self.hitbox = (self.x + 17, self.y + 11, 29, 52)
 
     def draw(self, win):
         if self.walkCount + 1 >= 27:
@@ -58,8 +60,8 @@ class Player(Positioned, Dimensioned):
         if not image is None:
             win.blit(image, (self.x, self.y))
 
-        self.hitbox = (self.x + 17, self.y + 11, 29, 52)
-        #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+        self.hitBox = HitBox(self.x + 17, self.y + 11, 29, 52)
+#        self.hitBox.draw(win)
 
     def hit(self):
         self.standing = True
@@ -73,18 +75,29 @@ class Projectile(Positioned):
     def __init__(self, x, y, radius, color, facing):
         Positioned.__init__(self, x, y)
 
+        self.hitBox = HitBox(x - radius, y - radius, radius * 2, radius * 2)
+
         self.radius = radius
+        self.diameter = radius * 2
         self.color = color
         self.facing = facing
         self.vel = 8 * facing
 
+    def move(self):
+        bullet.x += bullet.vel
+
+        self.hitBox = HitBox(self.x - self.radius, self.y - self.radius, self.diameter, self.diameter)
+
     def draw(self,win):
         pygame.draw.circle(win, self.color, (int(self.x),int(self.y)), int(self.radius))
+#        self.hitBox.draw(win)
 
 class Enemy(Positioned, Dimensioned):
     def __init__(self, x, y, length, height, end):
         Positioned.__init__(self, x, y)
         Dimensioned.__init__(self, length, height)
+
+        self.hitBox = HitBox(x + 17, y + 2, 31, 57)
 
         self.end = end
         self.path = [self.x, self.end]
@@ -92,7 +105,6 @@ class Enemy(Positioned, Dimensioned):
         self.walkRight = ImageList("R1E.png", "R2E.png", "R3E.png", "R4E.png", "R5E.png", "R6E.png", "R7E.png", "R8E.png", "R9E.png", "R10E.png", "R11E.png")
         self.walkCount = 0
         self.vel = 3
-        self.hitbox = (self.x + 17, self.y + 2, 31, 57)
         self.health = 10
         self.visible = True
 
@@ -109,10 +121,11 @@ class Enemy(Positioned, Dimensioned):
                 win.blit(self.walkLeft[self.walkCount //3], (self.x, self.y))
                 self.walkCount += 1
 
-            pygame.draw.rect(win, (255,0,0), (self.hitbox[0], self.hitbox[1] - 20, 50, 10))
-            pygame.draw.rect(win, (0,128,0), (self.hitbox[0], self.hitbox[1] - 20, 50 - (5 * (10 - self.health)), 10))
-            self.hitbox = (self.x + 17, self.y + 2, 31, 57)
-            #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+            pygame.draw.rect(win, (255,0,0), (self.hitBox.x, self.hitBox.y - 20, 50, 10))
+            pygame.draw.rect(win, (0,128,0), (self.hitBox.x, self.hitBox.y - 20, 50 - (5 * (10 - self.health)), 10))
+
+            self.hitBox = HitBox(self.x + 17, self.y + 2, 31, 57)
+#            self.hitBox.draw(win)
 
     def move(self):
         if self.vel > 0:
@@ -164,12 +177,11 @@ while run:
     hitText = None
 
     if goblin.visible == True:
-        if man.hitbox[1] < goblin.hitbox[1] + goblin.hitbox[3] and man.hitbox[1] + man.hitbox[3] > goblin.hitbox[1]:
-            if man.hitbox[0] + man.hitbox[2] > goblin.hitbox[0] and man.hitbox[0] < goblin.hitbox[0] + goblin.hitbox[2]:
-                man.hit()
-                score -= 5
-                hitCoolDown = 200
-                hitText = Text(200, 200, "-5", hitFont, (255, 0, 0))
+        if goblin.hitBox.collidesWith(man.hitBox):
+            man.hit()
+            score -= 5
+            hitCoolDown = 200
+            hitText = Text(200, 200, "-5", hitFont, (255, 0, 0))
 
     if shootLoop > 0:
         shootLoop += 1
@@ -181,15 +193,13 @@ while run:
             run = False
 
     for bullet in bullets:
-        if bullet.y - bullet.radius < goblin.hitbox[1] + goblin.hitbox[3] and bullet.y + bullet.radius > goblin.hitbox[1]:
-            if bullet.x + bullet.radius > goblin.hitbox[0] and bullet.x - bullet.radius < goblin.hitbox[0] + goblin.hitbox[2]:
-                hitSound.play()
-                goblin.hit()
-                score += 1
-                bullets.pop(bullets.index(bullet))
-
-        if bullet.x < 500 and bullet.x > 0:
-            bullet.x += bullet.vel
+        if bullet.hitBox.collidesWith(goblin.hitBox):
+            bullets.pop(bullets.index(bullet))
+            goblin.hit()
+            hitSound.play()
+            score += 1
+        elif bullet.x < 500 and bullet.x > 0:
+            bullet.move()
         else:
             bullets.pop(bullets.index(bullet))
 
