@@ -11,10 +11,6 @@ class Entity(Positioned, Dimensioned):
         Positioned.__init__(self, x, y)
         Dimensioned.__init__(self, length, height)
 
-    @property
-    def topLeftPosition(self):
-        return (self.x - self.halfLength, self.y - self.halfHeight)
-
 class CollidableEntity(Entity, PositionChangedListener):
     def __init__(self, x, y, length, height):
         Entity.__init__(self, x, y, length, height)
