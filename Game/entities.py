@@ -1,5 +1,3 @@
-## This file picks up (temporarily) from Tutorial #10.
-
 import pygame
 
 from collision import HitBox
