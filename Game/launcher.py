@@ -1,6 +1,7 @@
 import pygame
 
 from images import ImageList
+from positioning import Positioned, PositionChangedListener
 from window import Window
 
 pygame.init()
@@ -17,10 +18,10 @@ pygame.mixer.music.play(-1)
 
 score = 0
 
-class Player(object):
-    def __init__(self,x,y,width,height):
-        self.x = x
-        self.y = y
+class Player(Positioned):
+    def __init__(self, x, y, width, height):
+        Positioned.__init__(self, x, y)
+
         self.width = width
         self.height = height
         self.vel = 5
@@ -68,10 +69,10 @@ class Player(object):
         self.y = 410
         self.walkCount = 0
 
-class projectile(object):
-    def __init__(self,x,y,radius,color,facing):
-        self.x = x
-        self.y = y
+class Projectile(Positioned):
+    def __init__(self, x, y, radius, color, facing):
+        Positioned.__init__(self, x, y)
+
         self.radius = radius
         self.color = color
         self.facing = facing
@@ -80,10 +81,10 @@ class projectile(object):
     def draw(self,win):
         pygame.draw.circle(win, self.color, (int(self.x),int(self.y)), int(self.radius))
 
-class enemy(object):
+class Enemy(Positioned):
     def __init__(self, x, y, width, height, end):
-        self.x = x
-        self.y = y
+        Positioned.__init__(self, x, y)
+
         self.width = width
         self.height = height
         self.end = end
@@ -135,10 +136,10 @@ class enemy(object):
             self.visible = False
         print('hit')
 
-class Text(object):
-    def __init__(self, text, font, color, position):
+class Text(Positioned):
+    def __init__(self, x, y, text, font, color):
+        Positioned.__init__(self, x, y)
         self.surface = font.render(text, 1, color)
-        self.position = position
 
     def draw(self, surface):
         surface.blit(self.surface, self.position)
@@ -152,7 +153,7 @@ scoreFont = pygame.font.SysFont("comicsans", 30, True)
 hitFont = pygame.font.SysFont("comicsans", 100)
 
 man = Player(200, 410, 64,64)
-goblin = enemy(100, 410, 64, 64, 450)
+goblin = Enemy(100, 410, 64, 64, 450)
 shootLoop = 0
 bullets = []
 hitCoolDown = 0
@@ -169,7 +170,7 @@ while run:
                 man.hit()
                 score -= 5
                 hitCoolDown = 200
-                hitText = Text("-5", hitFont, (255, 0, 0), (200, 200))
+                hitText = Text(200, 200, "-5", hitFont, (255, 0, 0))
 
     if shootLoop > 0:
         shootLoop += 1
@@ -209,7 +210,7 @@ while run:
 
             if len(bullets) < 5:
                 bulletSound.play()
-                bullets.append(projectile(round(man.x + man.width //2), round(man.y + man.height//2), 6, (0,0,0), facing))
+                bullets.append(Projectile(round(man.x + man.width //2), round(man.y + man.height//2), 6, (0,0,0), facing))
 
             shootLoop = 1
 
@@ -244,7 +245,7 @@ while run:
                 man.isJump = False
                 man.jumpCount = 10
 
-    window.drawItem(Text("Score: " + str(score), scoreFont, (0, 0, 0), (350, 10)))
+    window.drawItem(Text(350, 10, "Score: " + str(score), scoreFont, (0, 0, 0)))
 
     if not hitText is None:
         window.drawItem(hitText)
