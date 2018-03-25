@@ -1,23 +1,23 @@
 import pygame
+
+from images import ImageList
 from window import Window
 
 pygame.init()
 
-walkRight = [pygame.image.load('R1.png'), pygame.image.load('R2.png'), pygame.image.load('R3.png'), pygame.image.load('R4.png'), pygame.image.load('R5.png'), pygame.image.load('R6.png'), pygame.image.load('R7.png'), pygame.image.load('R8.png'), pygame.image.load('R9.png')]
-walkLeft = [pygame.image.load('L1.png'), pygame.image.load('L2.png'), pygame.image.load('L3.png'), pygame.image.load('L4.png'), pygame.image.load('L5.png'), pygame.image.load('L6.png'), pygame.image.load('L7.png'), pygame.image.load('L8.png'), pygame.image.load('L9.png')]
 char = pygame.image.load('standing.png')
 
 clock = pygame.time.Clock()
 
-bulletSound = pygame.mixer.Sound('bullet.wav')
-hitSound = pygame.mixer.Sound('hit.wav')
+bulletSound = pygame.mixer.Sound('bullet.mp3')
+hitSound = pygame.mixer.Sound('hit.mp3')
 
 music = pygame.mixer.music.load('music.mp3')
 pygame.mixer.music.play(-1)
 
 score = 0
 
-class player(object):
+class Player(object):
     def __init__(self,x,y,width,height):
         self.x = x
         self.y = y
@@ -27,6 +27,8 @@ class player(object):
         self.isJump = False
         self.left = False
         self.right = False
+        self.walkLeft = ImageList("L1.png", "L2.png", "L3.png", "L4.png", "L5.png", "L6.png", "L7.png", "L8.png", "L9.png")
+        self.walkRight = ImageList("R1.png", "R2.png", "R3.png", "R4.png", "R5.png", "R6.png", "R7.png", "R8.png", "R9.png")
         self.walkCount = 0
         self.jumpCount = 10
         self.standing = True
@@ -36,18 +38,25 @@ class player(object):
         if self.walkCount + 1 >= 27:
             self.walkCount = 0
 
-        if not(self.standing):
-            if self.left:
-                win.blit(walkLeft[self.walkCount//3], (self.x,self.y))
-                self.walkCount += 1
-            elif self.right:
-                win.blit(walkRight[self.walkCount//3], (self.x,self.y))
-                self.walkCount +=1
+        image = None
+
+        if self.standing:
+            image = (self.walkRight if self.right else self.walkLeft)[0]
         else:
-            if self.right:
-                win.blit(walkRight[0], (self.x, self.y))
-            else:
-                win.blit(walkLeft[0], (self.x, self.y))
+            images = None
+
+            if self.left:
+                images = self.walkLeft
+            elif self.right:
+                images = self.walkRight
+
+            if not images is None:
+                image = images[self.walkCount // 3]
+                self.walkCount += 1
+
+        if not image is None:
+            win.blit(image, (self.x, self.y))
+
         self.hitbox = (self.x + 17, self.y + 11, 29, 52)
         #pygame.draw.rect(win, (255,0,0), self.hitbox,2)
 
@@ -72,9 +81,6 @@ class projectile(object):
         pygame.draw.circle(win, self.color, (int(self.x),int(self.y)), int(self.radius))
 
 class enemy(object):
-    walkRight = [pygame.image.load('R1E.png'), pygame.image.load('R2E.png'), pygame.image.load('R3E.png'), pygame.image.load('R4E.png'), pygame.image.load('R5E.png'), pygame.image.load('R6E.png'), pygame.image.load('R7E.png'), pygame.image.load('R8E.png'), pygame.image.load('R9E.png'), pygame.image.load('R10E.png'), pygame.image.load('R11E.png')]
-    walkLeft = [pygame.image.load('L1E.png'), pygame.image.load('L2E.png'), pygame.image.load('L3E.png'), pygame.image.load('L4E.png'), pygame.image.load('L5E.png'), pygame.image.load('L6E.png'), pygame.image.load('L7E.png'), pygame.image.load('L8E.png'), pygame.image.load('L9E.png'), pygame.image.load('L10E.png'), pygame.image.load('L11E.png')]
-
     def __init__(self, x, y, width, height, end):
         self.x = x
         self.y = y
@@ -82,6 +88,8 @@ class enemy(object):
         self.height = height
         self.end = end
         self.path = [self.x, self.end]
+        self.walkLeft = ImageList("L1E.png", "L2E.png", "L3E.png", "L4E.png", "L5E.png", "L6E.png", "L7E.png", "L8E.png", "L9E.png", "L10E.png", "L11E.png")
+        self.walkRight = ImageList("R1E.png", "R2E.png", "R3E.png", "R4E.png", "R5E.png", "R6E.png", "R7E.png", "R8E.png", "R9E.png", "R10E.png", "R11E.png")
         self.walkCount = 0
         self.vel = 3
         self.hitbox = (self.x + 17, self.y + 2, 31, 57)
@@ -143,7 +151,7 @@ window.setBackgroundImage("bg.jpg")
 scoreFont = pygame.font.SysFont("comicsans", 30, True)
 hitFont = pygame.font.SysFont("comicsans", 100)
 
-man = player(200, 410, 64,64)
+man = Player(200, 410, 64,64)
 goblin = enemy(100, 410, 64, 64, 450)
 shootLoop = 0
 bullets = []
