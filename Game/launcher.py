@@ -2,6 +2,7 @@ import pygame
 
 from collision import HitBox
 from dimensioning import Dimensioned
+from entities import Entity, CollidableEntity
 from images import ImageList
 from positioning import Positioned, PositionChangedListener
 from window import Window
@@ -20,12 +21,10 @@ pygame.mixer.music.play(-1)
 
 score = 0
 
-class Player(Positioned, Dimensioned):
+class Player(CollidableEntity):
     def __init__(self, x, y, length, height):
-        Positioned.__init__(self, x, y)
-        Dimensioned.__init__(self, length, height)
-
-        self.hitBox = HitBox(x + 17, y + 11, 29, 52)
+        CollidableEntity.__init__(self, x, y, length, height)
+        self.adjustHitBox(17, 11, -(64 - 29), -(64 - 52))
 
         self.vel = 5
         self.isJump = False
@@ -60,8 +59,7 @@ class Player(Positioned, Dimensioned):
         if not image is None:
             win.blit(image, (self.x, self.y))
 
-        self.hitBox = HitBox(self.x + 17, self.y + 11, 29, 52)
-#        self.hitBox.draw(win)
+            self.showHitBox(win)
 
     def hit(self):
         self.standing = True
@@ -71,11 +69,10 @@ class Player(Positioned, Dimensioned):
         self.y = 410
         self.walkCount = 0
 
-class Projectile(Positioned):
+class Projectile(CollidableEntity):
     def __init__(self, x, y, radius, color, facing):
-        Positioned.__init__(self, x, y)
-
-        self.hitBox = HitBox(x - radius, y - radius, radius * 2, radius * 2)
+        self.diameter = radius * 2
+        CollidableEntity.__init__(self, x, y, self.diameter, self.diameter)
 
         self.radius = radius
         self.diameter = radius * 2
@@ -90,14 +87,12 @@ class Projectile(Positioned):
 
     def draw(self,win):
         pygame.draw.circle(win, self.color, (int(self.x),int(self.y)), int(self.radius))
-#        self.hitBox.draw(win)
 
-class Enemy(Positioned, Dimensioned):
+        self.showHitBox(win)
+
+class Enemy(CollidableEntity):
     def __init__(self, x, y, length, height, end):
-        Positioned.__init__(self, x, y)
-        Dimensioned.__init__(self, length, height)
-
-        self.hitBox = HitBox(x + 17, y + 2, 31, 57)
+        CollidableEntity.__init__(self, x, y, length, height)
 
         self.end = end
         self.path = [self.x, self.end]
@@ -124,8 +119,7 @@ class Enemy(Positioned, Dimensioned):
             pygame.draw.rect(win, (255,0,0), (self.hitBox.x, self.hitBox.y - 20, 50, 10))
             pygame.draw.rect(win, (0,128,0), (self.hitBox.x, self.hitBox.y - 20, 50 - (5 * (10 - self.health)), 10))
 
-            self.hitBox = HitBox(self.x + 17, self.y + 2, 31, 57)
-#            self.hitBox.draw(win)
+            self.showHitBox(win)
 
     def move(self):
         if self.vel > 0:
@@ -177,7 +171,7 @@ while run:
     hitText = None
 
     if goblin.visible == True:
-        if goblin.hitBox.collidesWith(man.hitBox):
+        if goblin.collidesWith(man):
             man.hit()
             score -= 5
             hitCoolDown = 200
@@ -193,12 +187,12 @@ while run:
             run = False
 
     for bullet in bullets:
-        if bullet.hitBox.collidesWith(goblin.hitBox):
+        if bullet.collidesWith(goblin):
             bullets.pop(bullets.index(bullet))
             goblin.hit()
             hitSound.play()
             score += 1
-        elif bullet.x < 500 and bullet.x > 0:
+        elif 0 < bullet.x < 500:
             bullet.move()
         else:
             bullets.pop(bullets.index(bullet))
