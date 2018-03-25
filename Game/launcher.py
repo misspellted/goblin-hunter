@@ -59,7 +59,7 @@ class Player(CollidableEntity):
         if not image is None:
             win.blit(image, (self.x, self.y))
 
-            self.showHitBox(win)
+#            self.showHitBox(win)
 
     def hit(self):
         self.standing = True
@@ -88,11 +88,12 @@ class Projectile(CollidableEntity):
     def draw(self,win):
         pygame.draw.circle(win, self.color, (int(self.x),int(self.y)), int(self.radius))
 
-        self.showHitBox(win)
+#        self.showHitBox(win)
 
 class Enemy(CollidableEntity):
     def __init__(self, x, y, length, height, end):
         CollidableEntity.__init__(self, x, y, length, height)
+        self.adjustHitBox(17, 2, -(64 - 31), -(64 - 57))
 
         self.end = end
         self.path = [self.x, self.end]
@@ -119,7 +120,7 @@ class Enemy(CollidableEntity):
             pygame.draw.rect(win, (255,0,0), (self.hitBox.x, self.hitBox.y - 20, 50, 10))
             pygame.draw.rect(win, (0,128,0), (self.hitBox.x, self.hitBox.y - 20, 50 - (5 * (10 - self.health)), 10))
 
-            self.showHitBox(win)
+#            self.showHitBox(win)
 
     def move(self):
         if self.vel > 0:
