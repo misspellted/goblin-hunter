@@ -1,0 +1,3 @@
+# Ignore any compiled Python modules.
+*.pyc
+
