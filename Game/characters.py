@@ -2,21 +2,27 @@ import pygame
 
 from entities import CollidableEntity
 from imaging import ImageList
+from weapons import Gun
 
 class Player(CollidableEntity):
     def __init__(self, x, y, length, height):
         CollidableEntity.__init__(self, x, y, length, height)
         self.adjustHitBox(17, 11, -(64 - 29), -(64 - 52))
 
-        self.vel = 5
-        self.isJump = False
+        self.standing = True
         self.left = False
         self.right = False
+
         self.walkLeft = ImageList("L1.png", "L2.png", "L3.png", "L4.png", "L5.png", "L6.png", "L7.png", "L8.png", "L9.png")
         self.walkRight = ImageList("R1.png", "R2.png", "R3.png", "R4.png", "R5.png", "R6.png", "R7.png", "R8.png", "R9.png")
         self.walkCount = 0
+
+        self.isJump = False
         self.jumpCount = 10
-        self.standing = True
+
+        self.weapon = Gun(3)
+
+        self.vel = 5
         self.score = 0
 
     def jump(self):
@@ -27,6 +33,17 @@ class Player(CollidableEntity):
             startedNewJump = True
 
         return startedNewJump
+
+    def shoot(self):
+        bulletFired = None
+
+        if not self.weapon is None:
+            # Shoot from the center of the player.
+            position = self.x + self.halfLength, self.y + self.halfHeight
+
+            bulletFired = self.weapon.fire(position, -1 if self.left else 1)
+
+        return bulletFired
 
     def update(self):
         if self.walkCount + 1 >= 27:
@@ -45,6 +62,9 @@ class Player(CollidableEntity):
             else:
                 self.isJump = False
                 self.jumpCount = 10
+
+        if not self.weapon is None:
+            self.weapon.update()
 
     def draw(self, win):
         image = None
