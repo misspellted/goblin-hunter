@@ -19,30 +19,46 @@ class Player(CollidableEntity):
         self.standing = True
         self.score = 0
 
-    def draw(self, win):
+    def jump(self):
+        startedNewJump = False
+
+        if not self.isJump:
+            self.isJump = True
+            startedNewJump = True
+
+        return startedNewJump
+
+    def update(self):
         if self.walkCount + 1 >= 27:
             self.walkCount = 0
 
+        if not self.standing:
+            self.walkCount += 1
+
+        if self.isJump:
+            if -10 <= self.jumpCount:
+                neg = 1
+                if self.jumpCount < 0:
+                    neg = -1
+                self.y -= (self.jumpCount ** 2) * 0.5 * neg
+                self.jumpCount -= 1
+            else:
+                self.isJump = False
+                self.jumpCount = 10
+
+    def draw(self, win):
         image = None
 
         if self.standing:
             image = (self.walkRight if self.right else self.walkLeft)[0]
         else:
-            images = None
-
-            if self.left:
-                images = self.walkLeft
-            elif self.right:
-                images = self.walkRight
-
-            if not images is None:
-                image = images[self.walkCount // 3]
-                self.walkCount += 1
+            imageIndex = self.walkCount // 3
+            image = self.walkLeft[imageIndex] if self.left else self.walkRight[imageIndex] if self.right else None
 
         if not image is None:
-            win.blit(image, (self.x, self.y))
+            win.blit(image, self.position)
 
-#            self.showHitBox(win)
+#        self.showHitBox(win)
 
     def hit(self):
         self.standing = True
