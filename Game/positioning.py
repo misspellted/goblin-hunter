@@ -7,8 +7,8 @@ class PositionChangedListener(object):
 
 class Positioned(object):
     def __init__(self, x, y):
-        self._x = int(x)
-        self._y = int(y)
+        self._x = x
+        self._y = y
         self.changedListeners = list()
 
     def addPositionChangedListener(self, listener):
@@ -22,7 +22,7 @@ class Positioned(object):
     @x.setter
     def x(self, x):
         lastX = self._x
-        self._x = int(x)
+        self._x = x
         for listener in self.changedListeners:
             listener.onXChanged(lastX, self._x)
 
@@ -33,7 +33,7 @@ class Positioned(object):
     @y.setter
     def y(self, y):
         lastY = self._y
-        self._y = int(y)
+        self._y = y
         for listener in self.changedListeners:
             listener.onYChanged(lastY, self._y)
 
