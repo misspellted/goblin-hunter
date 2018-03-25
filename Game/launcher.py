@@ -1,5 +1,6 @@
 import pygame
 
+from dimensioning import Dimensioned
 from images import ImageList
 from positioning import Positioned, PositionChangedListener
 from window import Window
@@ -18,12 +19,11 @@ pygame.mixer.music.play(-1)
 
 score = 0
 
-class Player(Positioned):
-    def __init__(self, x, y, width, height):
+class Player(Positioned, Dimensioned):
+    def __init__(self, x, y, length, height):
         Positioned.__init__(self, x, y)
+        Dimensioned.__init__(self, length, height)
 
-        self.width = width
-        self.height = height
         self.vel = 5
         self.isJump = False
         self.left = False
@@ -81,12 +81,11 @@ class Projectile(Positioned):
     def draw(self,win):
         pygame.draw.circle(win, self.color, (int(self.x),int(self.y)), int(self.radius))
 
-class Enemy(Positioned):
-    def __init__(self, x, y, width, height, end):
+class Enemy(Positioned, Dimensioned):
+    def __init__(self, x, y, length, height, end):
         Positioned.__init__(self, x, y)
+        Dimensioned.__init__(self, length, height)
 
-        self.width = width
-        self.height = height
         self.end = end
         self.path = [self.x, self.end]
         self.walkLeft = ImageList("L1E.png", "L2E.png", "L3E.png", "L4E.png", "L5E.png", "L6E.png", "L7E.png", "L8E.png", "L9E.png", "L10E.png", "L11E.png")
@@ -210,7 +209,7 @@ while run:
 
             if len(bullets) < 5:
                 bulletSound.play()
-                bullets.append(Projectile(round(man.x + man.width //2), round(man.y + man.height//2), 6, (0,0,0), facing))
+                bullets.append(Projectile(round(man.x + man.length //2), round(man.y + man.height//2), 6, (0,0,0), facing))
 
             shootLoop = 1
 
@@ -219,7 +218,7 @@ while run:
             man.left = True
             man.right = False
             man.standing = False
-        elif keys[pygame.K_RIGHT] and man.x < 500 - man.width - man.vel:
+        elif keys[pygame.K_RIGHT] and man.x < 500 - man.length - man.vel:
             man.x += man.vel
             man.right = True
             man.left = False
