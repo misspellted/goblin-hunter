@@ -1,41 +1,19 @@
 import pygame
 
 from characters import Player, Enemy
-from entities import CollidableEntity
 from positioning import Positioned
 from window import Window
 
+pygame.mixer.pre_init(44100, -16, 2, 2048)
+pygame.mixer.init()
 pygame.init()
-
-char = pygame.image.load('standing.png')
 
 clock = pygame.time.Clock()
 
-bulletSound = pygame.mixer.Sound('bullet.mp3')
-hitSound = pygame.mixer.Sound('hit.mp3')
+hitSound = pygame.mixer.Sound("hit.wav")
 
 music = pygame.mixer.music.load('music.mp3')
 pygame.mixer.music.play(-1)
-
-class Projectile(CollidableEntity):
-    def __init__(self, x, y, radius, color, facing):
-        diameter = radius * 2
-        CollidableEntity.__init__(self, x, y, diameter, diameter)
-        self.adjustHitBox(-radius, -radius, 0, 0)
-
-        self.radius = radius
-        self.diameter = radius * 2
-        self.color = color
-        self.facing = facing
-        self.vel = 8 * facing
-
-    def move(self):
-        bullet.x += bullet.vel
-
-    def draw(self,win):
-        pygame.draw.circle(win, self.color, (int(self.x),int(self.y)), int(self.radius))
-
-#        self.showHitBox(win)
 
 class Text(Positioned):
     def __init__(self, x, y, text, font, color):
@@ -55,7 +33,6 @@ hitFont = pygame.font.SysFont("comicsans", 100)
 
 man = Player(200, 410, 64,64)
 goblin = Enemy(100, 410, 64, 64, 450)
-shootLoop = 0
 bullets = []
 hitCoolDown = 0
 run = True
@@ -74,14 +51,10 @@ while run:
             hitCoolDown = 200
             hitText = Text(200, 200, "-5", hitFont, (255, 0, 0))
 
-    if shootLoop > 0:
-        shootLoop += 1
-    if shootLoop > 3:
-        shootLoop = 0
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+            continue
 
     for bullet in bullets:
         if bullet.collidesWith(goblin):
@@ -105,14 +78,14 @@ while run:
     else:
         keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_SPACE] and shootLoop == 0:
-            facing = -1 if man.left else 1
-
+        if keys[pygame.K_SPACE]:
+            # Only allow a maximum of 5 bullets on screen at any given time.
             if len(bullets) < 5:
-                bulletSound.play()
-                bullets.append(Projectile(round(man.x + man.length //2), round(man.y + man.height//2), 6, (0,0,0), facing))
+                projectile = man.shoot()
 
-            shootLoop = 1
+                # Of course, the weapon has a cool-down, so it may not fire one immediately.
+                if not projectile is None:
+                    bullets.append(projectile)
 
         if keys[pygame.K_LEFT] and man.x > man.vel:
             man.x -= man.vel
