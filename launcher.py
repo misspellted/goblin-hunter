@@ -31,9 +31,16 @@ window.setBackgroundImage("images/environment/bg.jpg")
 scoreFont = pygame.font.SysFont("comicsans", 30, True)
 hitFont = pygame.font.SysFont("comicsans", 100)
 
-man = Player(200, 410, 64,64)
-goblin = Enemy(100, 410, 64, 64, 450)
+player = Player(200, 410, 64,64)
+player.setMinimumLeftPosition(0)
+player.setMaximumRightPosition(500 - player.length)
+
+enemies = list()
+enemies.append(Enemy(100, 410, 64, 64, 450))
+enemies.append(Enemy(200, 410, 64, 64, 450))
+
 bullets = []
+
 hitCoolDown = 0
 run = True
 
@@ -42,12 +49,12 @@ while run:
 
     hitText = None
 
-    man.update()
+    player.update()
 
-    if goblin.visible == True:
-        if goblin.collidesWith(man):
-            man.hit()
-            man.score -= 5
+    for enemy in enemies:
+        if enemy.collidesWith(player):
+            player.hit()
+            player.score -= 5
             hitCoolDown = 200
             hitText = Text(200, 200, "-5", hitFont, (255, 0, 0))
 
@@ -57,12 +64,28 @@ while run:
             continue
 
     for bullet in bullets:
-        if bullet.collidesWith(goblin):
-            bullets.pop(bullets.index(bullet))
-            goblin.hit()
-            hitSound.play()
-            man.score += 1
-        elif 0 < bullet.x < 500:
+        bulletStillFlying = True
+
+        # Did the bullet impact any enemies?
+        for enemy in enemies:
+            if bullet.collidesWith(enemy):
+                bulletStillFlying = False
+                hitSound.play()
+                player.score += 1
+
+                # Did the enemy entity die on impact?
+                if enemy.hit():
+                    enemies.pop(enemies.index(enemy))
+
+            # One bullet, one enemy. For now...
+            if not bulletStillFlying:
+                break
+
+        # Is the bullet still in the field of battle?
+        if bulletStillFlying:
+            bulletStillFlying = 0 <= bullet.x <= 500
+
+        if bulletStillFlying:
             bullet.move()
         else:
             bullets.pop(bullets.index(bullet))
@@ -81,39 +104,33 @@ while run:
         if keys[pygame.K_SPACE]:
             # Only allow a maximum of 5 bullets on screen at any given time.
             if len(bullets) < 5:
-                projectile = man.shoot()
+                projectile = player.shoot()
 
                 # Of course, the weapon has a cool-down, so it may not fire one immediately.
                 if not projectile is None:
                     bullets.append(projectile)
 
-        if keys[pygame.K_LEFT] and man.x > man.vel:
-            man.x -= man.vel
-            man.left = True
-            man.right = False
-            man.standing = False
-        elif keys[pygame.K_RIGHT] and man.x < 500 - man.length - man.vel:
-            man.x += man.vel
-            man.right = True
-            man.left = False
-            man.standing = False
+        if keys[pygame.K_LEFT]:
+            player.turnLeft()
+            player.move()
+        elif keys[pygame.K_RIGHT]:
+            player.turnRight()
+            player.move()
         else:
-            man.standing = True
-            man.walkCount = 0
+            player.stop()
 
         if keys[pygame.K_UP]:
-            if man.jump():
-                man.right = False
-                man.left = False
-                man.walkCount = 0
+            player.jump()
 
-    window.drawItem(Text(350, 10, "Score: " + str(man.score), scoreFont, (0, 0, 0)))
+    window.drawItem(Text(350, 10, "Score: " + str(player.score), scoreFont, (0, 0, 0)))
 
     if not hitText is None:
         window.drawItem(hitText)
 
-    window.drawItem(man)
-    window.drawItem(goblin)
+    window.drawItem(player)
+
+    for enemy in enemies:
+        window.drawItem(enemy)
 
     for bullet in bullets:
         window.drawItem(bullet)

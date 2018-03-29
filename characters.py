@@ -13,6 +13,9 @@ class Player(CollidableEntity):
         self.left = False
         self.right = False
 
+        self.minimumLeftPosition = None
+        self.maximumRightPosition = None
+
         self.walkLeft = ImageList.fromDirectory("images/player/walkingLeft")
         self.walkRight = ImageList.fromDirectory("images/player/walkingRight")
         self.walkCount = 0
@@ -25,12 +28,48 @@ class Player(CollidableEntity):
         self.vel = 5
         self.score = 0
 
+    def setMinimumLeftPosition(self, minimumLeftPosition):
+        self.minimumLeftPosition = minimumLeftPosition
+
+    def setMaximumRightPosition(self, maximumRightPosition):
+        self.maximumRightPosition = maximumRightPosition
+
+    def turnLeft(self):
+        self.left = True
+        self.right = False
+        self.standing = False
+
+    def turnRight(self):
+        self.left = False
+        self.right = True
+        self.standing = False
+
+    def stop(self):
+        self.standing = True
+        self.walkCount = 0
+
+    def move(self):
+        if self.left:
+            self.x -= self.vel
+            if not self.minimumLeftPosition is None:
+                if self.x < self.minimumLeftPosition:
+                    self.x = self.minimumLeftPosition
+        elif self.right:
+            self.x += self.vel
+            if not self.maximumRightPosition is None:
+                print("Current X: " + str(self.x) + ", Maximum X: " + str(self.maximumRightPosition))
+                if self.maximumRightPosition < self.x:
+                    self.x = self.maximumRightPosition
+
     def jump(self):
         startedNewJump = False
 
         if not self.isJump:
             self.isJump = True
             startedNewJump = True
+            self.left = False
+            self.right = False
+            self.walkCount = 0
 
         return startedNewJump
 
@@ -104,21 +143,21 @@ class Enemy(CollidableEntity):
 
     def draw(self,win):
         self.move()
-        if self.visible:
-            if self.walkCount + 1 >= 33:
-                self.walkCount = 0
 
-            if self.vel > 0:
-                win.blit(self.walkRight[self.walkCount //3], (self.x, self.y))
-                self.walkCount += 1
-            else:
-                win.blit(self.walkLeft[self.walkCount //3], (self.x, self.y))
-                self.walkCount += 1
+        if self.walkCount + 1 >= 33:
+            self.walkCount = 0
 
-            pygame.draw.rect(win, (255,0,0), (self.hitBox.x, self.hitBox.y - 20, 50, 10))
-            pygame.draw.rect(win, (0,128,0), (self.hitBox.x, self.hitBox.y - 20, 50 - (5 * (10 - self.health)), 10))
+        if self.vel > 0:
+            win.blit(self.walkRight[self.walkCount //3], (self.x, self.y))
+            self.walkCount += 1
+        else:
+            win.blit(self.walkLeft[self.walkCount //3], (self.x, self.y))
+            self.walkCount += 1
 
-#            self.showHitBox(win)
+        pygame.draw.rect(win, (255,0,0), (self.hitBox.x, self.hitBox.y - 20, 50, 10))
+        pygame.draw.rect(win, (0,128,0), (self.hitBox.x, self.hitBox.y - 20, 50 - (5 * (10 - self.health)), 10))
+
+#        self.showHitBox(win)
 
     def move(self):
         if self.vel > 0:
@@ -135,8 +174,7 @@ class Enemy(CollidableEntity):
                 self.walkCount = 0
 
     def hit(self):
-        if self.health > 0:
-            self.health -= 1
-        else:
-            self.visible = False
-        print('hit')
+        self.health -= 1
+
+        # Did the enemy die?
+        return self.health <= 0
