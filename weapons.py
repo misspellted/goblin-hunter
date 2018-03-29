@@ -26,7 +26,7 @@ class Projectile(CollidableEntity):
 
 class Gun(object):
     def __init__(self, coolDown):
-        self.firingSound = pygame.mixer.Sound("bullet.wav")
+        self.firingSound = pygame.mixer.Sound("audio/sounds/bullet.wav")
         self.startingCoolDown = coolDown
         self.coolDown = 0
 
