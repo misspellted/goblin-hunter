@@ -13,8 +13,8 @@ class Player(CollidableEntity):
         self.left = False
         self.right = False
 
-        self.walkLeft = ImageList("L1.png", "L2.png", "L3.png", "L4.png", "L5.png", "L6.png", "L7.png", "L8.png", "L9.png")
-        self.walkRight = ImageList("R1.png", "R2.png", "R3.png", "R4.png", "R5.png", "R6.png", "R7.png", "R8.png", "R9.png")
+        self.walkLeft = ImageList.fromDirectory("images/player/walkingLeft")
+        self.walkRight = ImageList.fromDirectory("images/player/walkingRight")
         self.walkCount = 0
 
         self.isJump = False
@@ -95,8 +95,8 @@ class Enemy(CollidableEntity):
 
         self.end = end
         self.path = [self.x, self.end]
-        self.walkLeft = ImageList("L1E.png", "L2E.png", "L3E.png", "L4E.png", "L5E.png", "L6E.png", "L7E.png", "L8E.png", "L9E.png", "L10E.png", "L11E.png")
-        self.walkRight = ImageList("R1E.png", "R2E.png", "R3E.png", "R4E.png", "R5E.png", "R6E.png", "R7E.png", "R8E.png", "R9E.png", "R10E.png", "R11E.png")
+        self.walkLeft = ImageList.fromDirectory("images/goblin/walkingLeft")
+        self.walkRight = ImageList.fromDirectory("images/goblin/walkingRight")
         self.walkCount = 0
         self.vel = 3
         self.health = 10
