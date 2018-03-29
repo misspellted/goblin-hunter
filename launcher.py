@@ -10,9 +10,9 @@ pygame.init()
 
 clock = pygame.time.Clock()
 
-hitSound = pygame.mixer.Sound("hit.wav")
+hitSound = pygame.mixer.Sound("audio/sounds/hit.wav")
 
-music = pygame.mixer.music.load('music.mp3')
+music = pygame.mixer.music.load('audio/tracks/music.mp3')
 pygame.mixer.music.play(-1)
 
 class Text(Positioned):
@@ -26,7 +26,7 @@ class Text(Positioned):
 #mainloop
 window = Window(500, 480)
 window.setCaption("First Game")
-window.setBackgroundImage("bg.jpg")
+window.setBackgroundImage("images/environment/bg.jpg")
 
 scoreFont = pygame.font.SysFont("comicsans", 30, True)
 hitFont = pygame.font.SysFont("comicsans", 100)
