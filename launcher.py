@@ -1,6 +1,7 @@
 import pygame
 
-from characters import Player, Enemy
+from goblin import Enemy
+from player import Player
 from positioning import Positioned
 from window import Window
 
@@ -31,7 +32,7 @@ window.setBackgroundImage("images/environment/bg.jpg")
 scoreFont = pygame.font.SysFont("comicsans", 30, True)
 hitFont = pygame.font.SysFont("comicsans", 100)
 
-player = Player(200, 410, 64,64)
+player = Player(0, 410, 64,64)
 player.setMinimumLeftPosition(0)
 player.setMaximumRightPosition(500 - player.length)
 
@@ -41,7 +42,7 @@ enemies.append(Enemy(200, 410, 64, 64, 450))
 
 bullets = []
 
-hitCoolDown = 0
+hitTextCoolDown = 0
 run = True
 
 while run:
@@ -53,10 +54,9 @@ while run:
 
     for enemy in enemies:
         if enemy.collidesWith(player):
-            player.hit()
-            player.score -= 5
-            hitCoolDown = 200
-            hitText = Text(200, 200, "-5", hitFont, (255, 0, 0))
+            if player.onAttackedBy(enemy):
+                hitTextCoolDown = 200
+                hitText = Text(200, 200, "-5", hitFont, (255, 0, 0))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -90,37 +90,34 @@ while run:
         else:
             bullets.pop(bullets.index(bullet))
 
-    # Punish the player if they got hit by not processing any input.
-    if 0 < hitCoolDown:
-        pygame.time.delay(10)
-        hitCoolDown -= 1
+    if 0 < hitTextCoolDown:
+        hitTextCoolDown -= 1
 
-        if hitCoolDown <= 0:
-            # Don't forget to hide the message.
+        if hitTextCoolDown <= 0:
             hitText = None
+
+    keys = pygame.key.get_pressed()
+
+    if keys[pygame.K_SPACE]:
+        # Only allow a maximum of 5 bullets on screen at any given time.
+        if len(bullets) < 5:
+            projectile = player.shoot()
+
+            # Of course, the weapon has a cool-down, so it may not fire one immediately.
+            if not projectile is None:
+                bullets.append(projectile)
+
+    if keys[pygame.K_LEFT]:
+        player.turnLeft()
+        player.move()
+    elif keys[pygame.K_RIGHT]:
+        player.turnRight()
+        player.move()
     else:
-        keys = pygame.key.get_pressed()
+        player.stop()
 
-        if keys[pygame.K_SPACE]:
-            # Only allow a maximum of 5 bullets on screen at any given time.
-            if len(bullets) < 5:
-                projectile = player.shoot()
-
-                # Of course, the weapon has a cool-down, so it may not fire one immediately.
-                if not projectile is None:
-                    bullets.append(projectile)
-
-        if keys[pygame.K_LEFT]:
-            player.turnLeft()
-            player.move()
-        elif keys[pygame.K_RIGHT]:
-            player.turnRight()
-            player.move()
-        else:
-            player.stop()
-
-        if keys[pygame.K_UP]:
-            player.jump()
+    if keys[pygame.K_UP]:
+        player.jump()
 
     window.drawItem(Text(350, 10, "Score: " + str(player.score), scoreFont, (0, 0, 0)))
 
@@ -136,5 +133,9 @@ while run:
         window.drawItem(bullet)
 
     window.refresh()
+
+    # Game ends when there are no more enemies (for now).
+    if len(enemies) == 0:
+        run = False
 
 pygame.quit()

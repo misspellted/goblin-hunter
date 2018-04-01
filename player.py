@@ -9,6 +9,8 @@ class Player(CollidableEntity):
         CollidableEntity.__init__(self, x, y, length, height)
         self.adjustHitBox(17, 11, -(64 - 29), -(64 - 52))
 
+        self.startingPosition = (x, y)
+
         self.standing = True
         self.left = False
         self.right = False
@@ -27,6 +29,9 @@ class Player(CollidableEntity):
 
         self.vel = 5
         self.score = 0
+
+        self.startingInvincibilityCoolDown = 200
+        self.invincibilityCoolDown = 0
 
     def setMinimumLeftPosition(self, minimumLeftPosition):
         self.minimumLeftPosition = minimumLeftPosition
@@ -57,7 +62,6 @@ class Player(CollidableEntity):
         elif self.right:
             self.x += self.vel
             if not self.maximumRightPosition is None:
-                print("Current X: " + str(self.x) + ", Maximum X: " + str(self.maximumRightPosition))
                 if self.maximumRightPosition < self.x:
                     self.x = self.maximumRightPosition
 
@@ -105,6 +109,9 @@ class Player(CollidableEntity):
         if not self.weapon is None:
             self.weapon.update()
 
+        if 0 < self.invincibilityCoolDown:
+            self.invincibilityCoolDown -= 1
+
     def draw(self, win):
         image = None
 
@@ -119,62 +126,30 @@ class Player(CollidableEntity):
 
 #        self.showHitBox(win)
 
-    def hit(self):
-        self.standing = True
-        self.isJump = False
-        self.jumpCount = 10
-        self.x = 100
-        self.y = 410
-        self.walkCount = 0
+    def onAttackedBy(self, attacker=None):
+        """Handles an attack on the entity from another."""
 
-class Enemy(CollidableEntity):
-    def __init__(self, x, y, length, height, end):
-        CollidableEntity.__init__(self, x, y, length, height)
-        self.adjustHitBox(17, 2, -(64 - 31), -(64 - 57))
+        # If the player is not invincible, handle the attack.
+        attackSuccessful = self.invincibilityCoolDown <= 0
 
-        self.end = end
-        self.path = [self.x, self.end]
-        self.walkLeft = ImageList.fromDirectory("images/goblin/walkingLeft")
-        self.walkRight = ImageList.fromDirectory("images/goblin/walkingRight")
-        self.walkCount = 0
-        self.vel = 3
-        self.health = 10
-        self.visible = True
+        if attackSuccessful:
+            # Reset jumping.
+            self.isJump = False
+            self.jumpCount = 10
 
-    def draw(self,win):
-        self.move()
+            # "Respawn the player" (move them to their starting position).
+            self.x, self.y = self.startingPosition
 
-        if self.walkCount + 1 >= 33:
-            self.walkCount = 0
+            # Stop moving
+            self.stop()
 
-        if self.vel > 0:
-            win.blit(self.walkRight[self.walkCount //3], (self.x, self.y))
-            self.walkCount += 1
-        else:
-            win.blit(self.walkLeft[self.walkCount //3], (self.x, self.y))
-            self.walkCount += 1
+            # Decrease the score:
+            self.score -= 5
 
-        pygame.draw.rect(win, (255,0,0), (self.hitBox.x, self.hitBox.y - 20, 50, 10))
-        pygame.draw.rect(win, (0,128,0), (self.hitBox.x, self.hitBox.y - 20, 50 - (5 * (10 - self.health)), 10))
+            # Activate temporary invincibility.
+            self.invincibilityCoolDown = self.startingInvincibilityCoolDown
 
-#        self.showHitBox(win)
-
-    def move(self):
-        if self.vel > 0:
-            if self.x + self.vel < self.path[1]:
-                self.x += self.vel
-            else:
-                self.vel = self.vel * -1
-                self.walkCount = 0
-        else:
-            if self.x - self.vel > self.path[0]:
-                self.x += self.vel
-            else:
-                self.vel = self.vel * -1
-                self.walkCount = 0
+        return attackSuccessful
 
     def hit(self):
-        self.health -= 1
-
-        # Did the enemy die?
-        return self.health <= 0
+        self.onAttack(None)
