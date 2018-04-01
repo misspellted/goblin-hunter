@@ -1,5 +1,6 @@
 import pygame
 
+from affects.invincibility import Invincibility
 from entities import CollidableEntity
 from imaging import ImageList
 from weapons import Gun
@@ -30,8 +31,7 @@ class Player(CollidableEntity):
         self.vel = 5
         self.score = 0
 
-        self.startingInvincibilityCoolDown = 200
-        self.invincibilityCoolDown = 0
+        self.affects = list()
 
     def setMinimumLeftPosition(self, minimumLeftPosition):
         self.minimumLeftPosition = minimumLeftPosition
@@ -109,8 +109,11 @@ class Player(CollidableEntity):
         if not self.weapon is None:
             self.weapon.update()
 
-        if 0 < self.invincibilityCoolDown:
-            self.invincibilityCoolDown -= 1
+        for affect in self.affects:
+            if not affect.isActive():
+                self.affects.pop(self.affects.index(affect))
+            else:
+                affect.update()
 
     def draw(self, win):
         image = None
@@ -128,9 +131,13 @@ class Player(CollidableEntity):
 
     def onAttackedBy(self, attacker=None):
         """Handles an attack on the entity from another."""
+        attackSuccessful = True
 
-        # If the player is not invincible, handle the attack.
-        attackSuccessful = self.invincibilityCoolDown <= 0
+        # If the player is invincible, ignore the attack.
+        for affect in self.affects:
+            if type(affect) is Invincibility:
+                attackSuccessful = False
+                break
 
         if attackSuccessful:
             # Reset jumping.
@@ -146,8 +153,8 @@ class Player(CollidableEntity):
             # Decrease the score:
             self.score -= 5
 
-            # Activate temporary invincibility.
-            self.invincibilityCoolDown = self.startingInvincibilityCoolDown
+            # Apply temporary invincibility affect.
+            self.affects.append(Invincibility(200))
 
         return attackSuccessful
 
