@@ -8,6 +8,8 @@ class Enemy(CollidableEntity):
         CollidableEntity.__init__(self, x, y, length, height)
         self.adjustHitBox(17, 2, -(64 - 31), -(64 - 57))
 
+        self.hitSound = pygame.mixer.Sound("audio/sounds/hit.wav")
+
         self.end = end
         self.path = [self.x, self.end]
         self.walkLeft = ImageList.fromDirectory("images/goblin/walkingLeft")
@@ -50,6 +52,8 @@ class Enemy(CollidableEntity):
                 self.walkCount = 0
 
     def hit(self):
+        self.hitSound.play()
+
         self.health -= 1
 
         # Did the enemy die?
