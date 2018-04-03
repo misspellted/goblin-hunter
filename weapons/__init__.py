@@ -1,5 +1,6 @@
 import pygame
 
+from affects import Affect
 from entities import CollidableEntity
 
 class Projectile(CollidableEntity):
@@ -24,17 +25,25 @@ class Projectile(CollidableEntity):
 
 #        self.showHitBox(win)
 
+class Reloading(Affect):
+    def __init__(self, duration):
+        Affect.__init__(self, duration)
+
+    def update(self):
+        if self.isActive():
+            self.coolDown -= 1
+
 class Gun(object):
-    def __init__(self, coolDown):
+    def __init__(self, reloadingDuration):
         self.firingSound = pygame.mixer.Sound("audio/sounds/bullet.wav")
-        self.startingCoolDown = coolDown
-        self.coolDown = 0
+        self.reloading = None
+        self.reloadingDuration = reloadingDuration
 
     def fire(self, position, direction):
         projectile = None
 
-        if self.coolDown == 0:
-            self.coolDown = self.startingCoolDown
+        if self.reloading is None:
+            self.reloading = Reloading(self.reloadingDuration)
             x, y = position
             projectile = Projectile(x, y, 6, (0, 0, 0), direction)
             self.firingSound.play()
@@ -42,5 +51,9 @@ class Gun(object):
         return projectile
 
     def update(self):
-        if 0 < self.coolDown:
-            self.coolDown -= 1
+        if not self.reloading is None:
+            self.reloading.update()
+
+            # Remove the reloading affect if the reloading is complete.
+            if not self.reloading.isActive():
+                self.reloading = None
