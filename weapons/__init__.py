@@ -35,18 +35,22 @@ class Reloading(Affect):
 
 class Gun(object):
     def __init__(self, reloadingDuration):
-        self.firingSound = pygame.mixer.Sound("audio/sounds/bullet.wav")
         self.reloading = None
         self.reloadingDuration = reloadingDuration
+
+    def chamber(self, position, direction):
+        return NotImplemented
+
+    def onBulletFired(self):
+        pass
 
     def fire(self, position, direction):
         projectile = None
 
         if self.reloading is None:
             self.reloading = Reloading(self.reloadingDuration)
-            x, y = position
-            projectile = Projectile(x, y, 6, (0, 0, 0), direction)
-            self.firingSound.play()
+            projectile = self.chamber(position, direction)
+            self.onBulletFired()
 
         return projectile
 
