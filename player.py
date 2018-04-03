@@ -3,7 +3,7 @@ import pygame
 from affects.invincibility import Invincibility
 from entities import CollidableEntity
 from imaging import ImageList
-from weapons import Gun
+from weapons.pistol import Pistol
 
 class Player(CollidableEntity):
     def __init__(self, x, y, length, height):
@@ -26,7 +26,7 @@ class Player(CollidableEntity):
         self.isJump = False
         self.jumpCount = 10
 
-        self.weapon = Gun(3)
+        self.weapon = Pistol(3)
 
         self.vel = 5
         self.score = 0
