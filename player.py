@@ -8,16 +8,13 @@ from weapons.pistol import Pistol
 class Player(CollidableEntity):
     def __init__(self, x, y, length, height):
         CollidableEntity.__init__(self, x, y, length, height)
-        self.adjustHitBox(17, 11, -(64 - 29), -(64 - 52))
+        self.adjustHitBox(17, 11, -(length - 29), -(height - 52))
 
         self.startingPosition = (x, y)
 
         self.standing = True
         self.left = False
         self.right = False
-
-        self.minimumLeftPosition = None
-        self.maximumRightPosition = None
 
         self.walkLeft = ImageList.fromDirectory("images/player/walkingLeft")
         self.walkRight = ImageList.fromDirectory("images/player/walkingRight")
@@ -32,12 +29,6 @@ class Player(CollidableEntity):
         self.score = 0
 
         self.affects = list()
-
-    def setMinimumLeftPosition(self, minimumLeftPosition):
-        self.minimumLeftPosition = minimumLeftPosition
-
-    def setMaximumRightPosition(self, maximumRightPosition):
-        self.maximumRightPosition = maximumRightPosition
 
     def turnLeft(self):
         self.left = True
@@ -56,14 +47,14 @@ class Player(CollidableEntity):
     def move(self):
         if self.left:
             self.x -= self.vel
-            if not self.minimumLeftPosition is None:
-                if self.x < self.minimumLeftPosition:
-                    self.x = self.minimumLeftPosition
+            if not self.minimumXPosition is None:
+                if self.x < self.minimumXPosition:
+                    self.x = self.minimumXPosition
         elif self.right:
             self.x += self.vel
-            if not self.maximumRightPosition is None:
-                if self.maximumRightPosition < self.x:
-                    self.x = self.maximumRightPosition
+            if not self.maximumXPosition is None:
+                if self.maximumXPosition < self.x:
+                    self.x = self.maximumXPosition
 
     def jump(self):
         startedNewJump = False

@@ -32,12 +32,15 @@ class GoblinHunter(object):
         window.setBackgroundImage("images/environment/bg.jpg")
 
         player = Player(0, 410, 64,64)
-        player.setMinimumLeftPosition(0)
-        player.setMaximumRightPosition(500 - player.length)
+        window.addEntity(player)
 
         enemies = list()
-        enemies.append(Enemy(100, 410, 64, 64, 450))
-        enemies.append(Enemy(200, 410, 64, 64, 450))
+        goblinOne = Enemy(100, 410, 64, 64)
+        window.addEntity(goblinOne)
+        enemies.append(goblinOne)
+        goblinTwo = Enemy(200, 410, 64, 64)
+        window.addEntity(goblinTwo)
+        enemies.append(goblinTwo)
 
         bullets = list()
 

@@ -9,6 +9,23 @@ class Entity(Positioned, Dimensioned):
     def __init__(self, x, y, length, height):
         Positioned.__init__(self, x, y)
         Dimensioned.__init__(self, length, height)
+        # TODO: Investigate implementing positioning ranges of some sort...
+        self.minimumXPosition = None
+        self.maximumXPosition = None
+        self.minimumYPosition = None
+        self.maximumYPosition = None
+
+    def setMinimumXPosition(self, minimumXPosition):
+        self.minimumXPosition = minimumXPosition
+
+    def setMaximumXPosition(self, maximumXPosition):
+        self.maximumXPosition = maximumXPosition
+
+    def setMinimumYPosition(self, minimumYPosition):
+        self.minimumYPosition = minimumYPosition
+
+    def setMaximumYPosition(self, maximumYPosition):
+        self.maximumYPosition = maximumYPosition
 
 class CollidableEntity(Entity, VectorXObserver, VectorYObserver):
     def __init__(self, x, y, length, height):
@@ -39,3 +56,22 @@ class CollidableEntity(Entity, VectorXObserver, VectorYObserver):
 
     def showHitBox(self, surface):
         self.hitBox.draw(surface)
+
+class EntityContainer(Entity):
+    def __init__(self, x, y, length, height):
+        Entity.__init__(self, x, y, length, height)
+        self.entities = list()
+
+    def addEntity(self, entity):
+        if isinstance(entity, Entity) and not entity in self.entities:
+            # Set the ranges on the X and Y position components.
+            entity.setMinimumXPosition(self.x)
+            entity.setMaximumXPosition(self.x + self.length - entity.length)
+            entity.setMinimumYPosition(self.y)
+            entity.setMaximumYPosition(self.y + self.height - entity.height)
+
+            self.entities.append(entity)
+
+    def removeEntity(self, entity):
+        if isinstance(entity, Entity) and entity in self.entities:
+            self.entities.remove(entity)

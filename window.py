@@ -1,7 +1,10 @@
 import pygame
 
-class Window(object):
+from entities import EntityContainer
+
+class Window(EntityContainer):
     def __init__(self, length, height):
+        EntityContainer.__init__(self, 0, 0, length, height)
         if not pygame.display.get_init():
             pygame.display.init()
 
