@@ -4,14 +4,12 @@ from entities import CollidableEntity
 from imaging import ImageList
 
 class Enemy(CollidableEntity):
-    def __init__(self, x, y, length, height, end):
+    def __init__(self, x, y, length, height):
         CollidableEntity.__init__(self, x, y, length, height)
-        self.adjustHitBox(17, 2, -(64 - 31), -(64 - 57))
+        self.adjustHitBox(17, 2, -(length - 31), -(height - 57))
 
         self.hitSound = pygame.mixer.Sound("audio/sounds/hit.wav")
 
-        self.end = end
-        self.path = [self.x, self.end]
         self.walkLeft = ImageList.fromDirectory("images/goblin/walkingLeft")
         self.walkRight = ImageList.fromDirectory("images/goblin/walkingRight")
         self.walkCount = 0
@@ -38,18 +36,16 @@ class Enemy(CollidableEntity):
 #        self.showHitBox(win)
 
     def move(self):
-        if self.vel > 0:
-            if self.x + self.vel < self.path[1]:
-                self.x += self.vel
-            else:
-                self.vel = self.vel * -1
-                self.walkCount = 0
-        else:
-            if self.x - self.vel > self.path[0]:
-                self.x += self.vel
-            else:
-                self.vel = self.vel * -1
-                self.walkCount = 0
+        self.x += self.vel
+
+        if self.x < self.minimumXPosition:
+            self.x = self.minimumXPosition
+            self.vel = self.vel * -1
+            self.walkCount = 0
+        elif self.maximumXPosition < self.x:
+            self.x = self.maximumXPosition
+            self.vel = self.vel * -1
+            self.walkCount = 0
 
     def hit(self):
         self.hitSound.play()
