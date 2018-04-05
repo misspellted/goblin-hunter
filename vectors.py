@@ -91,11 +91,20 @@ class TestVector(unittest.TestCase):
 
         self.assertEqual(str(tested), "(1, 2)")
 
-class WithX(Vector):
+class VectorXObserver(object):
+    def onXChanged(self, previous, current):
+        return NotImplemented
+
+class VectorX(Vector):
     def __init__(self, *values):
         if len(values) < 1:
             raise ValueError("'values' does not contain enough elements.")
         Vector.__init__(self, *values)
+        self._xObservers = list()
+
+    def addXObserver(self, observer):
+        if isinstance(observer, VectorXObserver):
+            self._xObservers.append(observer)
 
     @property
     def x(self):
@@ -103,11 +112,14 @@ class WithX(Vector):
 
     @x.setter
     def x(self, value):
+        previous = self.x
         self[0] = value
+        for observer in self._xObservers:
+            observer.onXChanged(previous, value)
 
-class TestWithX(unittest.TestCase):
+class TestVectorX(unittest.TestCase):
     def testX(self):
-        tested = WithX(1)
+        tested = VectorX(1)
 
         self.assertEqual(tested.x, 1)
 
@@ -115,11 +127,20 @@ class TestWithX(unittest.TestCase):
 
         self.assertEqual(tested.x, 2)
 
-class WithY(Vector):
+class VectorYObserver(object):
+    def onYChanged(self, previous, current):
+        return NotImplemented
+
+class VectorXY(VectorX):
     def __init__(self, *values):
         if len(values) < 2:
             raise ValueError("'values' does not contain enough elements.")
-        Vector.__init__(self, *values)
+        VectorX.__init__(self, *values)
+        self._yObservers = list()
+
+    def addYObserver(self, observer):
+        if isinstance(observer, VectorYObserver):
+            self._yObservers.append(observer)
 
     @property
     def y(self):
@@ -127,11 +148,14 @@ class WithY(Vector):
 
     @y.setter
     def y(self, value):
+        previous = self.y
         self[1] = value
+        for observer in self._yObservers:
+            observer.onYChanged(previous, value)
 
-class TestWithY(unittest.TestCase):
+class TestVectorXY(unittest.TestCase):
     def testY(self):
-        tested = WithY(1, 2)
+        tested = VectorXY(1, 2)
 
         self.assertEqual(tested.y, 2)
 
@@ -139,11 +163,20 @@ class TestWithY(unittest.TestCase):
 
         self.assertEqual(tested.y, 4)
 
-class WithZ(Vector):
+class VectorZObserver(object):
+    def onZChanged(self, previous, current):
+        return NotImplemented
+
+class VectorXYZ(VectorXY):
     def __init__(self, *values):
         if len(values) < 3:
             raise ValueError("'values' does not contain enough elements.")
-        Vector.__init__(self, *values)
+        VectorXY.__init__(self, *values)
+        self._zObservers = list()
+
+    def addZObserver(self, observer):
+        if isinstance(observer, VectorZObserver):
+            self._zObservers.append(observer)
 
     @property
     def z(self):
@@ -151,48 +184,20 @@ class WithZ(Vector):
 
     @z.setter
     def z(self, value):
+        previous = self.z
         self[2] = value
+        for observer in self._zObservers:
+            observer.onZChanged(previous, value)
 
-class TestWithZ(unittest.TestCase):
+class TestVectorXYZ(unittest.TestCase):
     def testZ(self):
-        tested = WithZ(1, 2, 3)
+        tested = VectorXYZ(1, 2, 3)
 
         self.assertEqual(tested.z, 3)
 
         tested.z = 6
 
         self.assertEqual(tested.z, 6)
-
-class VectorX(WithX):
-    def __init__(self, x):
-        Vector.__init__(self, x)
-
-# This kind of makes sense... but at the same time, only slightly.
-class VectorXY(WithX, WithY):
-    def __init__(self, x, y):
-        Vector.__init__(self, x, y)
-
-class TestVectorXY(unittest.TestCase):
-    def testInstance(self):
-        tested = VectorXY(1, 2)
-
-        self.assertEqual(len(tested), 2)
-        self.assertEqual(tested.x, 1)
-        self.assertEqual(tested.y, 2)
-
-# This kind of makes sense... but at the same time, only slightly.
-class VectorXYZ(WithX, WithY, WithZ):
-    def __init__(self, x, y, z):
-        Vector.__init__(self, x, y, z)
-
-class TestVectorXYZ(unittest.TestCase):
-    def testInstance(self):
-        tested = VectorXYZ(1, 2, 3)
-
-        self.assertEqual(len(tested), 3)
-        self.assertEqual(tested.x, 1)
-        self.assertEqual(tested.y, 2)
-        self.assertEqual(tested.z, 3)
 
 if __name__ == "__main__":
     unittest.main()

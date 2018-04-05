@@ -2,18 +2,19 @@ import pygame
 
 from collision import HitBox
 from dimensioning import Dimensioned
-from positioning import Positioned, PositionChangedListener
+from positioning import Positioned
+from vectors import VectorXObserver, VectorYObserver
 
 class Entity(Positioned, Dimensioned):
     def __init__(self, x, y, length, height):
         Positioned.__init__(self, x, y)
         Dimensioned.__init__(self, length, height)
 
-class CollidableEntity(Entity, PositionChangedListener):
+class CollidableEntity(Entity, VectorXObserver, VectorYObserver):
     def __init__(self, x, y, length, height):
         Entity.__init__(self, x, y, length, height)
-        PositionChangedListener.__init__(self)
-        self.addPositionChangedListener(self)
+        self.addXObserver(self)
+        self.addYObserver(self)
         self.hitBox = HitBox(x, y, length, height)
 
     def adjustHitBox(self, xOffset, yOffset, lengthOffset, heightOffset):

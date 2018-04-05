@@ -1,42 +1,9 @@
-class PositionChangedListener(object):
-    def onXChanged(self, last, current):
-        return NotImplemented
+from vectors import VectorXY
 
-    def onYChanged(self, last, current):
-        return NotImplemented
-
-class Positioned(object):
+class Positioned(VectorXY):
     def __init__(self, x, y):
-        self._x = x
-        self._y = y
-        self.changedListeners = list()
-
-    def addPositionChangedListener(self, listener):
-        if not listener is None:
-            self.changedListeners.append(listener)
-
-    @property
-    def x(self):
-        return self._x
-
-    @x.setter
-    def x(self, x):
-        lastX = self._x
-        self._x = x
-        for listener in self.changedListeners:
-            listener.onXChanged(lastX, self._x)
-
-    @property
-    def y(self):
-        return self._y
-
-    @y.setter
-    def y(self, y):
-        lastY = self._y
-        self._y = y
-        for listener in self.changedListeners:
-            listener.onYChanged(lastY, self._y)
+        VectorXY.__init__(self, x, y)
 
     @property
     def position(self):
-        return (self._x, self._y)
+        return (self.x, self.y)
