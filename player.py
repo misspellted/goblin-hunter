@@ -2,59 +2,68 @@ import pygame
 
 from affects.invincibility import Invincibility
 from entities import CollidableEntity
-from imaging import ImageList
+from imaging import Animated, Animation
+from vectors import VectorXY
 from weapons.pistol import Pistol
 
-class Player(CollidableEntity):
+class Player(CollidableEntity, Animated):
     def __init__(self, x, y, length, height):
+        self.startingPosition = (x, y)
+
         CollidableEntity.__init__(self, x, y, length, height)
         self.adjustHitBox(17, 11, -(length - 29), -(height - 52))
 
-        self.startingPosition = (x, y)
+        self.standingImage = pygame.image.load("images/player/standing.png")
 
-        self.standing = True
-        self.left = False
-        self.right = False
+        Animated.__init__(self)
 
-        self.walkLeft = ImageList.fromDirectory("images/player/walkingLeft")
-        self.walkRight = ImageList.fromDirectory("images/player/walkingRight")
-        self.walkCount = 0
+        # Walking information and visuals.
+        self.walkingVelocity = 5
+        self.walkingLeftAnimation = Animation.fromDirectory("images/player/walkingLeft", 3)
+        self.walkingRightAnimation = Animation.fromDirectory("images/player/walkingRight", 3)
 
+        # TODO: Convert jumping into an affect.
         self.isJump = False
         self.jumpCount = 10
 
         self.weapon = Pistol(3)
+        self.weapon.pointRight() # Weapons initially face right, towards the enem(y|ies).
 
-        self.vel = 5
+        self.velocity = VectorXY(0, 0)
         self.score = 0
 
         self.affects = list()
 
     def turnLeft(self):
-        self.left = True
-        self.right = False
-        self.standing = False
+        self.velocity.x = -self.walkingVelocity
+        self.setAnimation(self.walkingLeftAnimation)
+        self.weapon.pointLeft()
 
     def turnRight(self):
-        self.left = False
-        self.right = True
-        self.standing = False
+        self.velocity.x = self.walkingVelocity
+        self.setAnimation(self.walkingRightAnimation)
+        self.weapon.pointRight()
 
     def stop(self):
-        self.standing = True
-        self.walkCount = 0
+        self.velocity.x = 0
+        self.setAnimation(None)
 
     def move(self):
-        if self.left:
-            self.x -= self.vel
-            if not self.minimumXPosition is None:
-                if self.x < self.minimumXPosition:
-                    self.x = self.minimumXPosition
-        elif self.right:
-            self.x += self.vel
-            if not self.maximumXPosition is None:
-                if self.maximumXPosition < self.x:
-                    self.x = self.maximumXPosition
+        # TODO: Figure out how to do 'self.position += self.velocity'.
+        self.x += self.velocity.x
+        self.y += self.velocity.y
+
+        if not self.minimumXPosition is None and self.x < self.minimumXPosition:
+            self.x = self.minimumXPosition
+
+        if not self.maximumXPosition is None and self.maximumXPosition < self.x:
+            self.x = self.maximumXPosition
+
+        if not self.minimumYPosition is None and self.y < self.minimumYPosition:
+            self.y = self.minimumYPosition
+
+        if not self.maximumYPosition is None and self.maximumYPosition < self.y:
+            self.y = self.maximumYPosition
 
     def jump(self):
         startedNewJump = False
@@ -62,29 +71,23 @@ class Player(CollidableEntity):
         if not self.isJump:
             self.isJump = True
             startedNewJump = True
-            self.left = False
-            self.right = False
-            self.walkCount = 0
 
         return startedNewJump
 
     def shoot(self):
         bulletFired = None
 
+        # Only shoot if the weapon is available.
         if not self.weapon is None:
             # Shoot from the center of the player.
             position = self.x + self.halfLength, self.y + self.halfHeight
 
-            bulletFired = self.weapon.fire(position, -1 if self.left else 1)
+            bulletFired = self.weapon.fire(position)
 
         return bulletFired
 
     def update(self):
-        if self.walkCount + 1 >= 27:
-            self.walkCount = 0
-
-        if not self.standing:
-            self.walkCount += 1
+        self.updateAnimation()
 
         if self.isJump:
             if -10 <= self.jumpCount:
@@ -107,16 +110,12 @@ class Player(CollidableEntity):
                 affect.update()
 
     def draw(self, win):
-        image = None
+        image = self.getAnimationFrame()
 
-        if self.standing:
-            image = (self.walkRight if self.right else self.walkLeft)[0]
-        else:
-            imageIndex = self.walkCount // 3
-            image = self.walkLeft[imageIndex] if self.left else self.walkRight[imageIndex] if self.right else None
+        if image is None:
+            image = self.standingImage
 
-        if not image is None:
-            win.blit(image, self.position)
+        win.blit(image, self.position)
 
 #        self.showHitBox(win)
 

@@ -38,18 +38,18 @@ class Gun(object):
         self.reloading = None
         self.reloadingDuration = reloadingDuration
 
-    def chamber(self, position, direction):
+    def chamber(self, position):
         return NotImplemented
 
     def onBulletFired(self):
         pass
 
-    def fire(self, position, direction):
+    def fire(self, position):
         projectile = None
 
         if self.reloading is None:
             self.reloading = Reloading(self.reloadingDuration)
-            projectile = self.chamber(position, direction)
+            projectile = self.chamber(position)
             self.onBulletFired()
 
         return projectile
