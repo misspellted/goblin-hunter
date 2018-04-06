@@ -3,14 +3,23 @@ import pygame
 from weapons import Gun, Projectile
 
 class Pistol(Gun):
-    def __init__(self, reloadingDuration):
+    def __init__(self, reloadingDuration, direction=1):
         Gun.__init__(self, reloadingDuration)
         self.firingSound = pygame.mixer.Sound("audio/sounds/bullet.wav")
+        self.direction = direction
 
-    def chamber(self, position, direction):
+    def pointLeft(self):
+        print("Pointing left!")
+        self.direction = -1
+
+    def pointRight(self):
+        print("Pointing right!")
+        self.direction = 1
+
+    def chamber(self, position):
         x, y = position
 
-        return Projectile(x, y, 6, (0, 0, 0), direction)
+        return Projectile(x, y, 6, (0, 0, 0), self.direction)
 
     def onBulletFired(self):
         self.firingSound.play()

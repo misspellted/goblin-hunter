@@ -57,6 +57,7 @@ class GoblinHunter(object):
             player.update()
 
             for enemy in enemies:
+                enemy.update()
                 if enemy.collidesWith(player):
                     if player.onAttackedBy(enemy):
                         hitTextCoolDown = 200
