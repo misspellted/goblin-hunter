@@ -1,7 +1,7 @@
 import pygame
 
 from entities import CollidableEntity
-from imaging import Animated, Animation, ImageList
+from imaging import Animated, Animation
 from vectors import VectorXY
 
 class Enemy(CollidableEntity, Animated):
