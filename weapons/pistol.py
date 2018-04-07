@@ -9,11 +9,9 @@ class Pistol(Gun):
         self.direction = direction
 
     def pointLeft(self):
-        print("Pointing left!")
         self.direction = -1
 
     def pointRight(self):
-        print("Pointing right!")
         self.direction = 1
 
     def chamber(self, position):
