@@ -19,7 +19,7 @@ class GoblinHunter(object):
         pygame.mixer.init()
         pygame.init()
 
-        self.backgroundMusic = pygame.mixer.music.load('audio/tracks/music.mp3')
+        self.backgroundMusic = pygame.mixer.music.load('assets/audio/tracks/music.mp3')
         self.scoreFont = pygame.font.SysFont("comicsans", 30, True)
         self.hitFont = pygame.font.SysFont("comicsans", 100)
 
@@ -29,7 +29,7 @@ class GoblinHunter(object):
     def play(self):
         window = Window(500, 480)
         window.setCaption("First Game")
-        window.setBackgroundImage("images/environment/bg.jpg")
+        window.setBackgroundImage("assets/images/environment/bg.jpg")
 
         player = Player(0, 410, 64,64)
         window.addEntity(player)
