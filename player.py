@@ -82,7 +82,7 @@ class Player(CollidableEntity, Animated):
             # Shoot from the center of the player.
             position = self.x + self.halfLength, self.y + self.halfHeight
 
-            bulletFired = self.weapon.fire(position)
+            bulletFired = self.weapon.fire(position, self)
 
         return bulletFired
 
@@ -147,6 +147,3 @@ class Player(CollidableEntity, Animated):
             self.affects.append(Invincibility(200))
 
         return attackSuccessful
-
-    def hit(self):
-        self.onAttack(None)
