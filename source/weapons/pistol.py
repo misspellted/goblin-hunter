@@ -11,7 +11,7 @@ class Pistol(Gun):
     def __init__(self, reloadingDuration):
         Gun.__init__(self, reloadingDuration)
 
-        self.firingSound = pygame.mixer.Sound("audio/sounds/bullet.wav")
+        self.firingSound = pygame.mixer.Sound("assets/audio/sounds/bullet.wav")
 
     def chamber(self, position, source):
         return Ammo(position, self.direction)

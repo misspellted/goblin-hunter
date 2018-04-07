@@ -9,13 +9,13 @@ class Enemy(CollidableEntity, Animated):
         CollidableEntity.__init__(self, x, y, length, height)
         self.adjustHitBox(17, 2, -(length - 31), -(height - 57))
 
-        self.hitSound = pygame.mixer.Sound("audio/sounds/hit.wav")
+        self.hitSound = pygame.mixer.Sound("assets/audio/sounds/hit.wav")
 
         Animated.__init__(self)
 
         self.walkingVelocity = 3
-        self.walkingLeftAnimation = Animation.fromDirectory("images/goblin/walkingLeft", 3)
-        self.walkingRightAnimation = Animation.fromDirectory("images/goblin/walkingRight", 3)
+        self.walkingLeftAnimation = Animation.fromDirectory("assets/images/goblin/walkingLeft", 3)
+        self.walkingRightAnimation = Animation.fromDirectory("assets/images/goblin/walkingRight", 3)
 
         self.velocity = VectorXY(0, 0)
 

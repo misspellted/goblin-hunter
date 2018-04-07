@@ -1,7 +1,7 @@
 <project name="goblin-hunter" basedir="." default="compile">
 
-    <property name="source.dir" value="${basedir}" />
-    <property name="launcher" value="launcher.py" />
+    <property name="source.dir" value="${basedir}/source" />
+    <property name="launcher" value="${source.dir}/launcher.py" />
 
     <target name="clean">
         <delete>
@@ -15,8 +15,6 @@
             <arg value="compileall" />
             <arg value="-f" />
             <arg value="-q" />
-            <arg value="-x" />
-            <arg value="/\.git" />
             <arg value="${source.dir}" />
         </exec>
     </target>

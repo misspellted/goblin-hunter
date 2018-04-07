@@ -13,14 +13,14 @@ class Player(CollidableEntity, Animated):
         CollidableEntity.__init__(self, x, y, length, height)
         self.adjustHitBox(17, 11, -(length - 29), -(height - 52))
 
-        self.standingImage = pygame.image.load("images/player/standing.png")
+        self.standingImage = pygame.image.load("assets/images/player/standing.png")
 
         Animated.__init__(self)
 
         # Walking information and visuals.
         self.walkingVelocity = 5
-        self.walkingLeftAnimation = Animation.fromDirectory("images/player/walkingLeft", 3)
-        self.walkingRightAnimation = Animation.fromDirectory("images/player/walkingRight", 3)
+        self.walkingLeftAnimation = Animation.fromDirectory("assets/images/player/walkingLeft", 3)
+        self.walkingRightAnimation = Animation.fromDirectory("assets/images/player/walkingRight", 3)
 
         # TODO: Convert jumping into an affect.
         self.isJump = False
