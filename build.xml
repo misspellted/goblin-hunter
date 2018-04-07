@@ -1,0 +1,30 @@
+<project name="goblin-hunter" basedir="." default="compile">
+
+    <property name="source.dir" value="${basedir}" />
+    <property name="launcher" value="launcher.py" />
+
+    <target name="clean">
+        <delete>
+            <fileset dir="." includes="**/*.pyc" />
+        </delete>
+    </target>
+
+    <target name="compile" depends="clean">
+        <exec executable="python" failonerror="true">
+            <arg value="-m" />
+            <arg value="compileall" />
+            <arg value="-f" />
+            <arg value="-q" />
+            <arg value="-x" />
+            <arg value="/\.git" />
+            <arg value="${source.dir}" />
+        </exec>
+    </target>
+
+    <target name="launch" depends="compile">
+        <exec executable="python" spawn="true">
+            <arg value="${launcher}" />
+        </exec>
+    </target>
+
+</project>
